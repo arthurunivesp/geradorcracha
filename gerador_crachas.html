@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Gerador de Crachás Manual</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #config { border: 1px solid #ccc; padding: 10px; margin-bottom: 20px; }
+        #config label { display: block; margin: 5px 0; }
+        #input-section { border: 1px solid #ddd; padding: 10px; margin-bottom: 20px; }
+        #badges { display: flex; flex-wrap: wrap; gap: 10px; }
+        .badge {
+            width: 5.4cm; height: 8.5cm; position: relative; overflow: hidden;
+            background-size: cover; background-position: center; color: white;
+            text-shadow: 1px 1px 2px black; /* Para legibilidade no fundo */
+        }
+        .quoted { position: absolute; transform: translate(-50%, -50%); text-align: center; }
+        .rest { position: absolute; transform: translate(-50%, -50%); text-align: center; }
+        .rg { position: absolute; transform: translate(-50%, -50%); text-align: right; }
+        @media print {
+            #config, #input-section, button { display: none; }
+            #badges { display: grid; grid-template-columns: repeat(3, 5.4cm); grid-gap: 1cm; }
+            .badge { page-break-inside: avoid; }
+            @page { size: A4; margin: 0.5cm; }
+        }
+    </style>
+</head>
+<body>
+    <section id="config">
+        <h2>Matriz de Configuração (Aplica em Todos)</h2>
+        <label>Upload Fundo (fundo.png): <input type="file" id="bg-upload" accept="image/*" onchange="updateBackground(event)"></label>
+        <label>Tamanho Fonte Nome: <input type="number" id="quoted_fontsize" value="24" oninput="updateBadges()"></label>
+        <label>Posição Vertical Nome (%): <input type="number" id="quoted_top" value="40" oninput="updateBadges()"></label>
+        <label>Posição Horizontal Nome (%): <input type="number" id="quoted_left" value="50" oninput="updateBadges()"></label>
+        <label>Tamanho Fonte Sobrenome: <input type="number" id="rest_fontsize" value="16" oninput="updateBadges()"></label>
+        <label>Posição Vertical Sobrenome (%): <input type="number" id="rest_top" value="55" oninput="updateBadges()"></label>
+        <label>Posição Horizontal Sobrenome (%): <input type="number" id="rest_left" value="50" oninput="updateBadges()"></label>
+        <label>Tamanho Fonte RG: <input type="number" id="rg_fontsize" value="12" oninput="updateBadges()"></label>
+        <label>Posição Vertical RG (%): <input type="number" id="rg_top" value="65" oninput="updateBadges()"></label>
+        <label>Posição Horizontal RG (%): <input type="number" id="rg_left" value="60" oninput="updateBadges()"></label>
+    </section>
+
+    <section id="input-section">
+        <h2>Adicionar Crachá</h2>
+        <label>Nome: <input type="text" id="input_quoted" placeholder="Ex: Yolanda"></label>
+        <label>Sobrenome: <input type="text" id="input_rest" placeholder="Ex: Ap. Marinho"></label>
+        <label>RG: <input type="text" id="input_rg" placeholder="Ex: 42.040.773-x"></label>
+        <button onclick="addBadge()">Adicionar</button>
+    </section>
+
+    <div id="badges"></div>
+    <button onclick="generatePDF()">Gerar PDF A4 com Todos</button>
+
+    <script>
+        let people = [];
+        let backgroundUrl = '';
+
+        function updateBackground(event) {
+            const file = event.target.files[0];
+            if (file) {
+                backgroundUrl = URL.createObjectURL(file);
+                updateBadges();
+            }
+        }
+
+        function addBadge() {
+            const quoted = document.getElementById('input_quoted').value.trim();
+            const rest = document.getElementById('input_rest').value.trim();
+            const rg = document.getElementById('input_rg').value.trim();
+            if (quoted && rest && rg) {
+                people.push({quoted, rest, rg});
+                updateBadges();
+                // Limpa inputs para próximo
+                document.getElementById('input_quoted').value = '';
+                document.getElementById('input_rest').value = '';
+                document.getElementById('input_rg').value = '';
+            } else {
+                alert('Preencha todos os campos!');
+            }
+        }
+
+        function updateBadges() {
+            const badgesDiv = document.getElementById('badges');
+            badgesDiv.innerHTML = '';
+            if (!backgroundUrl) return;
+            people.forEach(p => {
+                const badge = document.createElement('div');
+                badge.className = 'badge';
+                badge.style.backgroundImage = `url(${backgroundUrl})`;
+                const quotedEl = document.createElement('div');
+                quotedEl.className = 'quoted';
+                quotedEl.textContent = p.quoted;
+                quotedEl.style.fontSize = document.getElementById('quoted_fontsize').value + 'pt';
+                quotedEl.style.top = document.getElementById('quoted_top').value + '%';
+                quotedEl.style.left = document.getElementById('quoted_left').value + '%';
+                badge.appendChild(quotedEl);
+                const restEl = document.createElement('div');
+                restEl.className = 'rest';
+                restEl.textContent = p.rest;
+                restEl.style.fontSize = document.getElementById('rest_fontsize').value + 'pt';
+                restEl.style.top = document.getElementById('rest_top').value + '%';
+                restEl.style.left = document.getElementById('rest_left').value + '%';
+                badge.appendChild(restEl);
+                const rgEl = document.createElement('div');
+                rgEl.className = 'rg';
+                rgEl.textContent = p.rg;
+                rgEl.style.fontSize = document.getElementById('rg_fontsize').value + 'pt';
+                rgEl.style.top = document.getElementById('rg_top').value + '%';
+                rgEl.style.left = document.getElementById('rg_left').value + '%';
+                badge.appendChild(rgEl);
+                badgesDiv.appendChild(badge);
+            });
+        }
+
+        async function generatePDF() {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pageWidth = 210;
+            const pageHeight = 297;
+            const badgeWidth = 54;
+            const badgeHeight = 85;
+            const cols = 3;
+            const rows = 3;
+            const hMargin = (pageWidth - cols * badgeWidth) / (cols + 1);
+            const vMargin = (pageHeight - rows * badgeHeight) / (rows + 1);
+            const badgesDiv = document.getElementById('badges');
+            let badgeIndex = 0;
+            const numPages = Math.ceil(people.length / (cols * rows));
+            for (let pg = 0; pg < numPages; pg++) {
+                if (pg > 0) pdf.addPage();
+                for (let r = 0; r < rows && badgeIndex < people.length; r++) {
+                    for (let c = 0; c < cols && badgeIndex < people.length; c++) {
+                        const badgeDiv = badgesDiv.children[badgeIndex];
+                        const canvas = await html2canvas(badgeDiv, {scale: 2});
+                        const imgData = canvas.toDataURL('image/png');
+                        const x = hMargin + c * (badgeWidth + hMargin);
+                        const y = vMargin + r * (badgeHeight + vMargin);
+                        pdf.addImage(imgData, 'PNG', x, y, badgeWidth, badgeHeight);
+                        badgeIndex++;
+                    }
+                }
+            }
+            pdf.save('crachas_a4.pdf');
+        }
+    </script>
+</body>
+</html>
