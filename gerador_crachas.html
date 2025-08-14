@@ -18,9 +18,9 @@
             background-position: center; /* Centraliza a imagem */
             text-shadow: 1px 1px 2px black;
         }
-        .quoted { position: absolute; transform: translate(-50%, -50%); text-align: center; font-weight: bold; }
-        .rest { position: absolute; transform: translate(-50%, -50%); text-align: center; font-weight: normal; }
-        .rg { position: absolute; transform: translate(-50%, -50%); text-align: right; font-weight: normal; }
+        .quoted { position: absolute; transform: translate(-50%, -50%); text-align: center; font-weight: bold; width: 90%; word-wrap: break-word; }
+        .rest { position: absolute; transform: translate(-50%, -50%); text-align: center; font-weight: normal; width: 90%; word-wrap: break-word; }
+        .rg { position: absolute; transform: translate(-50%, -50%); text-align: right; font-weight: normal; width: 80%; word-wrap: break-word; }
         @media print {
             #config, #input-section, button { display: none; }
             #badges { display: grid; grid-template-columns: repeat(3, 5.4cm); grid-gap: 1cm; }
@@ -158,11 +158,11 @@
                 for (let r = 0; r < rows && badgeIndex < people.length; r++) {
                     for (let c = 0; c < cols && badgeIndex < people.length; c++) {
                         const badgeDiv = badgesDiv.children[badgeIndex];
-                        const canvas = await html2canvas(badgeDiv, { scale: 4 }); // Aumenta a escala para melhor qualidade
-                        const imgData = canvas.toDataURL('image/png', 1.0); // Qualidade máxima
+                        const canvas = await html2canvas(badgeDiv, { scale: 4 });
+                        const imgData = canvas.toDataURL('image/png', 1.0);
                         const x = hMargin + c * (badgeWidth + hMargin);
                         const y = vMargin + r * (badgeHeight + vMargin);
-                        pdf.addImage(imgData, 'PNG', x, y, badgeWidth, badgeHeight, undefined, 'FAST'); // Modo rápido, menos compressão
+                        pdf.addImage(imgData, 'PNG', x, y, badgeWidth, badgeHeight, undefined, 'FAST');
                         badgeIndex++;
                     }
                 }
