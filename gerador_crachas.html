@@ -16,9 +16,9 @@
             background-size: cover; background-position: center; color: white;
             text-shadow: 1px 1px 2px black; /* Para legibilidade no fundo */
         }
-        .quoted { position: absolute; transform: translate(-50%, -50%); text-align: center; }
-        .rest { position: absolute; transform: translate(-50%, -50%); text-align: center; }
-        .rg { position: absolute; transform: translate(-50%, -50%); text-align: right; }
+        .quoted { position: absolute; transform: translate(-50%, -50%); text-align: center; font-weight: bold; }
+        .rest { position: absolute; transform: translate(-50%, -50%); text-align: center; font-weight: normal; }
+        .rg { position: absolute; transform: translate(-50%, -50%); text-align: right; font-weight: normal; }
         @media print {
             #config, #input-section, button { display: none; }
             #badges { display: grid; grid-template-columns: repeat(3, 5.4cm); grid-gap: 1cm; }
@@ -31,12 +31,27 @@
     <section id="config">
         <h2>Matriz de Configuração (Aplica em Todos)</h2>
         <label>Upload Fundo (fundo.png): <input type="file" id="bg-upload" accept="image/*" onchange="updateBackground(event)"></label>
+        <label>Fonte Nome: <select id="quoted_font" onchange="updateBadges()">
+            <option value="Arial Black">Arial Black</option>
+            <option value="Helvetica Neue Bold">Helvetica Neue Bold</option>
+            <option value="Impact">Impact</option>
+        </select></label>
         <label>Tamanho Fonte Nome: <input type="number" id="quoted_fontsize" value="24" oninput="updateBadges()"></label>
         <label>Posição Vertical Nome (%): <input type="number" id="quoted_top" value="40" oninput="updateBadges()"></label>
         <label>Posição Horizontal Nome (%): <input type="number" id="quoted_left" value="50" oninput="updateBadges()"></label>
+        <label>Fonte Sobrenome: <select id="rest_font" onchange="updateBadges()">
+            <option value="Arial">Arial</option>
+            <option value="Helvetica Neue Light">Helvetica Neue Light</option>
+            <option value="Verdana">Verdana</option>
+        </select></label>
         <label>Tamanho Fonte Sobrenome: <input type="number" id="rest_fontsize" value="16" oninput="updateBadges()"></label>
         <label>Posição Vertical Sobrenome (%): <input type="number" id="rest_top" value="55" oninput="updateBadges()"></label>
         <label>Posição Horizontal Sobrenome (%): <input type="number" id="rest_left" value="50" oninput="updateBadges()"></label>
+        <label>Fonte RG: <select id="rg_font" onchange="updateBadges()">
+            <option value="Arial">Arial</option>
+            <option value="Helvetica Neue Light">Helvetica Neue Light</option>
+            <option value="Verdana">Verdana</option>
+        </select></label>
         <label>Tamanho Fonte RG: <input type="number" id="rg_fontsize" value="12" oninput="updateBadges()"></label>
         <label>Posição Vertical RG (%): <input type="number" id="rg_top" value="65" oninput="updateBadges()"></label>
         <label>Posição Horizontal RG (%): <input type="number" id="rg_left" value="60" oninput="updateBadges()"></label>
@@ -92,6 +107,7 @@
                 const quotedEl = document.createElement('div');
                 quotedEl.className = 'quoted';
                 quotedEl.textContent = p.quoted;
+                quotedEl.style.fontFamily = document.getElementById('quoted_font').value;
                 quotedEl.style.fontSize = document.getElementById('quoted_fontsize').value + 'pt';
                 quotedEl.style.top = document.getElementById('quoted_top').value + '%';
                 quotedEl.style.left = document.getElementById('quoted_left').value + '%';
@@ -99,6 +115,7 @@
                 const restEl = document.createElement('div');
                 restEl.className = 'rest';
                 restEl.textContent = p.rest;
+                restEl.style.fontFamily = document.getElementById('rest_font').value;
                 restEl.style.fontSize = document.getElementById('rest_fontsize').value + 'pt';
                 restEl.style.top = document.getElementById('rest_top').value + '%';
                 restEl.style.left = document.getElementById('rest_left').value + '%';
@@ -106,6 +123,7 @@
                 const rgEl = document.createElement('div');
                 rgEl.className = 'rg';
                 rgEl.textContent = p.rg;
+                rgEl.style.fontFamily = document.getElementById('rg_font').value;
                 rgEl.style.fontSize = document.getElementById('rg_fontsize').value + 'pt';
                 rgEl.style.top = document.getElementById('rg_top').value + '%';
                 rgEl.style.left = document.getElementById('rg_left').value + '%';
